@@ -39,7 +39,6 @@ def getheadpos(node):
 
 def readheadrules(filename):
 	"""Read a file containing heuristic rules for head assignment.
-
 	Example line: ``s right-to-left vmfin vafin vaimp``, which means
 	traverse siblings of an S constituent from right to left, the first child
 	with a label of vmfin, vafin, or vaimp will be marked as head."""
@@ -70,7 +69,7 @@ def headfinder(tree, headrules, headlabels=frozenset({'HD'})):
 		for head in heads:
 			for child in children:
 				if (isinstance(child, Tree)
-						and child.label.split('[')[0] == head):
+						and child.label.split('[')[0].upper() == head):
 					return child
 
 	def invfind(heads, children):
@@ -78,7 +77,7 @@ def headfinder(tree, headrules, headlabels=frozenset({'HD'})):
 		for child in children:
 			for head in heads:
 				if (isinstance(child, Tree)
-						and child.label.split('[')[0] == head):
+						and child.label.split('[')[0].upper() == head):
 					return child
 
 	# check if we already have head information:
@@ -123,7 +122,6 @@ def headfinder(tree, headrules, headlabels=frozenset({'HD'})):
 
 def readmodifierrules(filename):
 	"""Read a file containing heuristic rules for marking modifiers.
-
 	Example line: ``S *-MOD``, which means that for an S
 	constituent, any child with the MOD function tag is a modifier.
 	A default rule can be specified by using * as the first label, which
@@ -162,16 +160,9 @@ def markmodifiers(tree, modifierrules):
 						or function(child).upper() == mod.split('-', 1)[1])):
 				child.type = MODIFIER
 				break
-		if child.label == prev:
+		if child.label == prev:  # mark enumerations/lists as modifiers
 			child.type = MODIFIER
 		prev = child.label
-		if child.source:
-			if child.source[FUNC].upper() in ('OBJ', 'SUJ', 'DE-OBJ', 'ATS',
-											  'A-OBJ', 'A_OBJ', 'DE_OBJ'):
-				child.type = COMPLEMENT
-		if child.source:
-			if child.source[FUNC].upper() == 'MOD':
-				child.type = MODIFIER
 
 
 def saveheads(tree, tailmarker):
@@ -190,7 +181,6 @@ def saveheads(tree, tailmarker):
 
 def headstats(trees):
 	"""Collect some information useful for writing headrules.
-
 	- ``heads['NP']['NN'] ==`` number of times NN occurs as head of NP.
 	- ``pos1['NP'][1] ==`` number of times head of NP is at position 1.
 	- ``pos2`` is like pos1, but position is from the right.
