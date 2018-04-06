@@ -160,9 +160,17 @@ def markmodifiers(tree, modifierrules):
 						or function(child).upper() == mod.split('-', 1)[1])):
 				child.type = MODIFIER
 				break
-		if child.label == prev:  # mark enumerations/lists as modifiers
+		if child.label == prev:
 			child.type = MODIFIER
 		prev = child.label
+		if child.source:
+			if child.source[FUNC].upper() in ('OBJ', 'SUJ', 'DE-OBJ', 'ATS',
+											  'A-OBJ', 'A_OBJ', 'DE_OBJ'):
+				child.type = COMPLEMENT
+		if child.source:
+			if child.source[FUNC].upper() == 'MOD':
+				child.type = MODIFIER
+
 
 
 def saveheads(tree, tailmarker):
