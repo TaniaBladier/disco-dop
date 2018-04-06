@@ -145,7 +145,6 @@ def readmodifierrules(filename):
 
 def markmodifiers(tree, modifierrules):
 	"""Use heuristics to distinguish complements from modifiers.
-
 	Should be applied after heads have been identified."""
 	from discodop.treebanktransforms import function
 	prev = None
@@ -153,18 +152,26 @@ def markmodifiers(tree, modifierrules):
 		if child.type == HEAD:
 			continue
 		child.type = COMPLEMENT
-		for mod in modifierrules.get(tree.label.split('-', 1)[0], []
-				) + modifierrules.get('*', []):
-			if ((child.label.split('-', 1)[0] == mod.split('-', 1)[0]
+		applicablerules = modifierrules.get(tree.label.split('-', 1)[0], []
+				) + modifierrules.get('*', [])
+		for mod in applicablerules:
+			if ((child.label.split('-', 1)[0].upper() == mod.split('-', 1)[0]
 					or mod.split('-', 1)[0] == '*')
 					and ('-' not in mod
 						or mod.split('-', 1)[1] == '*'
-						or function(child) == mod.split('-', 1)[1])):
+						or function(child).upper() == mod.split('-', 1)[1])):
 				child.type = MODIFIER
 				break
-		if child.label == prev:  # mark enumerations/lists as modifiers
+		if child.label == prev:
 			child.type = MODIFIER
 		prev = child.label
+		if child.source:
+			if child.source[FUNC].upper() in ('OBJ', 'SUJ', 'DE-OBJ', 'ATS',
+											  'A-OBJ', 'A_OBJ', 'DE_OBJ'):
+				child.type = COMPLEMENT
+		if child.source:
+			if child.source[FUNC].upper() == 'MOD':
+				child.type = MODIFIER
 
 
 def saveheads(tree, tailmarker):
