@@ -893,7 +893,25 @@ def ftbtransforms(name, tree, sent):
 					new_tree.type = COMPLEMENT
 					sbtree[i - 1].type = HEAD
 					sbtree.append(new_tree)
-
+					
+    elif name == 'ftbsimplifyfunctags':
+		""" replace original functional tags in FTB through 
+		shortened versions, so that we only have four following 
+		functional tags: 'OBJ', 'SUJ', ATS', 'MOD', so:
+		'DE-OBJ' => 'OBJ', 'A-OBJ' => 'OBJ', 'A_OBJ' => 'OBJ', 
+		'DE_OBJ' => 'OBJ', 'DE-OBJ/OBJ' => OBJ, 'P-OBJ' => 'OBJ' """
+		for child in tree.subtrees():
+			if child.source is not None:
+				if child.source[FUNC].upper().split('-')[-1] in ('OBJ',
+																 'OBJ/OBJ'):
+					child.label = strip(child.label) + '-OBJ'
+				elif child.source[FUNC].upper().split('-')[-1] in ('SUJ/OBJ',
+																   'SUJ/ATS',
+																	'-SUJ'):
+					child.label = strip(child.label) + '-SUJ'
+				elif child.source[FUNC].upper().split('-')[-1] == 'ATS':
+					child.label = strip(child.label) + '-ATS'
+					
 	elif name == 'ftbundocompounds':
 		# The "undo compounds" step as described in Candito, M., Crabbé, B.,
 		# & Denis, P. (2010). Statistical French dependency parsing:
